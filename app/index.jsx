@@ -6,22 +6,24 @@ import { FokusButton } from "../components/FokusButton";
 import { ActionButton } from "../components/ActionButton";
 import { Timer } from "../components/Timer";
 
+import { IconPause, IconPlay } from "../components/Icons";
+
 const pomodoro = [
   {
     id: "focus",
-    initialValue: 25,
+    initialValue: 25 * 60,
     image: require("../assets/images/pomodoro.png"),
     display: "Foco",
   },
   {
     id: "short",
-    initialValue: 5,
+    initialValue: 5 * 60,
     image: require("../assets/images/short.png"),
     display: "Pausa curta",
   },
   {
     id: "long",
-    initialValue: 15,
+    initialValue: 15 * 60,
     image: require("../assets/images/long.png"),
     display: "Pausa longa",
   },
@@ -64,7 +66,6 @@ export default function Index() {
         }
         return oldState - 1;
       });
-      console.log("Timer rolando");
     }, 1000);
     timerRef.current = id;
   };
@@ -86,6 +87,7 @@ export default function Index() {
         <Timer totasSeconds={seconds} />
         <FokusButton
           title={timerRunning ? "Pausar" : "Começar"}
+          icon={timerRunning ? <IconPause /> : <IconPlay />}
           onPress={toggleTimer}
         />
       </View>
