@@ -1,132 +1,136 @@
-import { StatusBar } from 'expo-status-bar'
-import { useState } from 'react'
-import { Text, View, StyleSheet, Image, Pressable } from 'react-native'
+import { StatusBar } from "expo-status-bar";
+import { useRef, useState } from "react";
+import { Text, View, StyleSheet, Image, Pressable } from "react-native";
+
+import { FokusButton } from "../components/FokusButton";
+import { ActionButton } from "../components/ActionButton";
+import { Timer } from "../components/Timer";
 
 const pomodoro = [
   {
-    id: 'focus',
+    id: "focus",
     initialValue: 25,
-    image: require('../assets/images/pomodoro.png'),
-    display: 'Foco',
+    image: require("../assets/images/pomodoro.png"),
+    display: "Foco",
   },
   {
-    id: 'short',
+    id: "short",
     initialValue: 5,
-    image: require('../assets/images/short.png'),
-    display: 'Pausa curta',
+    image: require("../assets/images/short.png"),
+    display: "Pausa curta",
   },
   {
-    id: 'long',
+    id: "long",
     initialValue: 15,
-    image: require('../assets/images/long.png'),
-    display: 'Pausa longa',
-  }
-]
+    image: require("../assets/images/long.png"),
+    display: "Pausa longa",
+  },
+];
 
 export default function Index() {
+  const [timerType, setTimerType] = useState(pomodoro[0]);
+  const [seconds, setSeconds] = useState(pomodoro[0].initialValue);
+  const [timerRunning, setTimerRunning] = useState(false);
 
-  const [timerType, setTimerType] = useState(pomodoro[1])
+  const timerRef = useRef(null);
+
+  const clear = () => {
+    if (timerRef.current != null) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+      setTimerRunning(false);
+    }
+  };
+
+  const toggleTimerType = (newTimerType) => {
+    setTimerType(newTimerType);
+    setSeconds(newTimerType.initialValue);
+    clear();
+  };
+
+  const toggleTimer = () => {
+    if (timerRef.current) {
+      clear();
+      return;
+    }
+
+    setTimerRunning(true);
+
+    const id = setInterval(() => {
+      setSeconds((oldState) => {
+        if (oldState === 0) {
+          clear();
+          return timerType.initialValue;
+        }
+        return oldState - 1;
+      });
+      console.log("Timer rolando");
+    }, 1000);
+    timerRef.current = id;
+  };
 
   return (
-    <View
-      style={styles.container}
-    >
+    <View style={styles.container}>
       <Image source={timerType.image} />
       <View style={styles.actions}>
         <View style={styles.context}>
-          {pomodoro.map(p => (
-          <Pressable
-            key={p.id}
-            style={timerType.id === p.id ? styles.contextButtonActive : null}
-            onPress={() => setTimerType(p)}
-          >
-            <Text style={styles.contextButtonText}>
-              {p.display}
-            </Text>
-          </Pressable>
+          {pomodoro.map((p) => (
+            <ActionButton
+              key={p.id}
+              active={timerType.id === p.id}
+              onPress={() => toggleTimerType(p)}
+              display={p.display}
+            />
           ))}
         </View>
-        <Text style={styles.timer}>
-          {new Date(timerType.initialValue * 1000).toLocaleTimeString('pt-br', { minute: '2-digit', second: '2-digit' })}
-        </Text>
-        <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>
-            Começar
-          </Text>
-        </Pressable>
+        <Timer totasSeconds={seconds} />
+        <FokusButton
+          title={timerRunning ? "Pausar" : "Começar"}
+          onPress={toggleTimer}
+        />
       </View>
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>
           Projeto fictício e sem fins comerciais..
         </Text>
-        <Text style={styles.footerText}>
-          Desenvolvido por Alura.
-        </Text>
+        <Text style={styles.footerText}>Desenvolvido por Alura.</Text>
       </View>
       <View>
-      <StatusBar style='translucent'/>
+        <StatusBar style="translucent" />
+      </View>
     </View>
-    </View>
-  )
+  );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: '#021123',
-    gap: 40
+    backgroundColor: "#021123",
+    gap: 40,
   },
   actions: {
     paddingVertical: 24,
     paddingHorizontal: 24,
-    backgroundColor: '#14448080',
-    width: '80%',
+    backgroundColor: "#14448080",
+    width: "80%",
     borderRadius: 32,
     borderWidth: 2,
-    borderColor: '#144480',
-    gap: 32
+    borderColor: "#144480",
+    gap: 32,
   },
   context: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-  contextButtonText: {
-    color: '#FFF',
-    padding: 8,
-    fontSize: 12.5,
-    fontWeight: 'bold',
-  },
-  contextButtonActive: {
-    backgroundColor: '#144480',
-    borderRadius: 8,
-  },
-  timer: {
-    color: '#FFF',
-    fontSize: 54,
-    fontWeight: 'bold',
-    textAlign: 'center'
-  },
-  button: {
-    backgroundColor: '#B872FF',
-    borderRadius: 32,
-    padding: 8
-  },
-  buttonText: {
-    textAlign: 'center',
-    color: '#021123',
-    fontWeight: 'bold',
-    fontSize: 18,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
   },
   footer: {
-    width: '80%'
+    width: "80%",
   },
   footerText: {
-    color: "#98A0A8",
     textAlign: "center",
+    color: "#98A0A8",
     fontSize: 12.5,
-  }
-})
+  },
+});
